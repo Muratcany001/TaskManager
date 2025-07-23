@@ -14,7 +14,6 @@ namespace TM.DAL.Entities.AppEntities
         public DateTime CreatedDate { get; set; } = DateTime.Now;
         public string FilePath { get; set; }
         public int? TaskId { get; set; }
-
         [JsonIgnore]
         public UserTask? Task { get; set; }
     }
