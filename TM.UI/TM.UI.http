@@ -1,0 +1,6 @@
+@TM.UI_HostAddress = http://localhost:5241
+
+GET {{TM.UI_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###
