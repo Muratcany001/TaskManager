@@ -4,12 +4,12 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using TM.DAL.Abstract;
 using TM.DAL.Entities.AppEntities;
-using TM.DAL.Repositories;
 
 namespace TM.DAL.Concrete
 {
-    internal class TaskVersionRepository
+    public class TaskVersionRepository : ITaskVersionRepository
     {
         private readonly Context _context;
         public TaskVersionRepository(Context context)

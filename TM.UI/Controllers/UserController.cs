@@ -1,9 +1,9 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using System.Security.Cryptography;
 using System.Text;
-using TM.BLL.Abstract;
+using TM.DAL.Abstract;
 using TM.DAL.Entities.AppEntities;
-using TM.DAL.Repositories;
+using TM.DAL;
 namespace TM.UI.Controllers
 {
         [ApiController]

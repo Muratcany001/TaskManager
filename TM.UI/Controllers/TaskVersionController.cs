@@ -1,5 +1,5 @@
 ﻿using Microsoft.AspNetCore.Mvc;
-using TM.BLL.Abstract;
+using TM.DAL.Abstract;
 
 namespace TM.UI.Controllers
 {

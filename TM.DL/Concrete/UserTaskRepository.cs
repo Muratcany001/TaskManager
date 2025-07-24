@@ -4,12 +4,12 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using TM.DAL.Abstract;
 using TM.DAL.Entities.AppEntities;
-using TM.DAL.Repositories;
 
 namespace TM.DAL.Concrete
 {
-    internal class UserTaskRepository
+    public class UserTaskRepository : ITaskRepository
     {
         private readonly Context _context;
         public UserTaskRepository(Context context)

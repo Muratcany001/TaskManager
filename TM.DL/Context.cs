@@ -1,12 +1,13 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using TM.DAL.Entities.AppEntities;
+using TM.DAL.Abstract;
 
-namespace TM.DAL.Repositories
+namespace TM.DAL
 {
     public class Context : DbContext
     {
         public Context(DbContextOptions<Context> options) : base(options) { }
-        protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder){}
+        protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder) { }
         public DbSet<User> Users { get; set; }
         public DbSet<UserTask> Tasks { get; set; }
         public DbSet<TaskVersion> Versions { get; set; }

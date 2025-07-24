@@ -1,7 +1,7 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using TM.DAL.Entities.AppEntities;
 using TM.DAL.Entities;
-using TM.BLL.Abstract;
+using TM.DAL.Abstract;
 namespace TM.UI.Controllers
 {
     [ApiController]

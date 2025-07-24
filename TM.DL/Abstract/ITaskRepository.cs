@@ -5,7 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 using TM.DAL.Entities.AppEntities;
 
-namespace TM.BLL.Abstract
+namespace TM.DAL.Abstract
 {
     public interface ITaskRepository
     {

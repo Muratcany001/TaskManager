@@ -5,15 +5,15 @@ using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
 using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
-using TM.DAL.Repositories;
+using TM.DAL;
 
 #nullable disable
 
 namespace TM.DAL.Migrations
 {
     [DbContext(typeof(Context))]
-    [Migration("20250723144820_InitialCreate")]
-    partial class InitialCreate
+    [Migration("20250724063241_MigrationAdi")]
+    partial class MigrationAdi
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
