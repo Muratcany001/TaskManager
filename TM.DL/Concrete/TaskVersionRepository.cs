@@ -17,26 +17,28 @@ namespace TM.DAL.Concrete
             _context = context;
         }
 
-        public async Task<TaskVersion?> GetNewVersionByTaskId(int taskId, int LastUpdaterId, string status)
+        public async Task<TaskVersion> GetNewVersionByTaskId(int taskId, int LastUpdaterId, string status)
         {
             var userTask = _context.Tasks
                                         .Include(x => x.CurrentVersion)
+                                            .ThenInclude(x=> x.Documents)
                                         .Include(x => x.Versions)
                                         .FirstOrDefault(x => x.Id == taskId);
 
             if (userTask == null)
                 throw new ArgumentException("Task bulunamadı");
-
             int nextVersionNumber = 1;
             if (userTask.Versions != null && userTask.Versions.Any())
                 nextVersionNumber = userTask.Versions.Max(x => x.VersionNumber) + 1;
+            var currentDocs = userTask.CurrentVersion.Documents?.ToList() ?? new List<Document>();
 
-            var copiedDocuments = userTask.CurrentVersion.Documents.Select(doc => new Document
-            {
-                Title = doc.Title,
-                FilePath = doc.FilePath,
-                TaskId = taskId,
-            });
+
+            var copiedDocuments = currentDocs
+                .Select(doc => new Document
+                {
+                    Title = doc.Title,
+                    FilePath = doc.FilePath
+                }).ToList();
 
             var newVersion = new TaskVersion
             {
@@ -45,10 +47,12 @@ namespace TM.DAL.Concrete
                 Time = DateTime.UtcNow,
                 Status = status,
                 CreatedByUserId = LastUpdaterId,
-                Documents = (ICollection<Document>)copiedDocuments
+                Documents = currentDocs
             };
 
             await _context.Versions.AddAsync(newVersion);
+            await _context.SaveChangesAsync();
+
             userTask.CurrentVersion = newVersion;
             userTask.CurrentVersionId = newVersion.Id;
             userTask.LastUpdater = LastUpdaterId;

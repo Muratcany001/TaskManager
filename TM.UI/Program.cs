@@ -11,6 +11,19 @@ var builder = WebApplication.CreateBuilder(args);
 // DbContext
 builder.Services.AddDbContext<Context>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
+var MyAllowSpecificOrigins = "_myAllowSpecificOrigins";
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy(name: MyAllowSpecificOrigins,
+                      builder =>
+                      {
+                          builder.WithOrigins("http://localhost:3000", // Example: your frontend development server
+                                              "https://myproductionapp.com") // Example: your production frontend domain
+                                 .AllowAnyHeader()
+                                 .AllowAnyMethod();
+                          // .AllowCredentials(); // Uncomment if you need to allow cookies/authentication headers
+                      });
+});
 
 // Repository baðýmlýlýklarý
 builder.Services.AddScoped<ITaskRepository, UserTaskRepository>();
@@ -29,6 +42,8 @@ builder.Services.AddControllers()
 // Swagger
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
+
+
 
 var app = builder.Build();
 

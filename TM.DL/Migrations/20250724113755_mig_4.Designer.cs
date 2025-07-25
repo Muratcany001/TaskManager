@@ -12,8 +12,8 @@ using TM.DAL;
 namespace TM.DAL.Migrations
 {
     [DbContext(typeof(Context))]
-    [Migration("20250724063241_MigrationAdi")]
-    partial class MigrationAdi
+    [Migration("20250724113755_mig_4")]
+    partial class mig_4
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)

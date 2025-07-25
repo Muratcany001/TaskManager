@@ -15,9 +15,8 @@ namespace TM.DAL.Entities.AppEntities
         public string Status { get; set; }
         public int? CreatedByUserId { get; set; }
         public int? TaskId { get; set; }
-        [JsonIgnore]
         public UserTask? Task { get; set; }
-        [JsonIgnore]
-        public ICollection<Document> Documents { get; set; } = new List<Document>();
+        public List<Document> Documents { get; set; } = new List<Document>();
+
     }
 }

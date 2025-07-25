@@ -40,7 +40,7 @@ namespace TM.UI.Controllers
                 }
             }
 
-            [HttpPost("version/DeleteLatestVersion/{taskId}")]
+            [HttpDelete("version/DeleteLatestVersion/{taskId}")]
             public async Task<IActionResult> DeleteLastestVersion(int taskId)
             {
                 var lastVersion = await _taskVersionRepository.GetLatestVersionByTaskId(taskId);

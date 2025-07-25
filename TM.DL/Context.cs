@@ -14,7 +14,7 @@ namespace TM.DAL
         public DbSet<Document> Documents { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
-        {
+        { 
             base.OnModelCreating(modelBuilder);
             modelBuilder.Entity<TaskVersion>()
                 .HasOne(tv => tv.Task)

@@ -14,28 +14,36 @@ namespace TM.UI.Controllers
         }
 
         [HttpPost("Document/CreateDocument")]
-        public async Task<ActionResult> CreateTaskItem(Document taskItem)
+        public async Task<ActionResult> CreateTaskItem(int taskId, Document taskItem)
         {
-            if (taskItem == null)
+            try
             {
-                return BadRequest("Dosya kaydı başarısız oldu");
+                if (taskItem == null)
+                {
+                    return BadRequest("Document cannot be null");
+                }
+
+                var createdDocument = await _documentRepository.CreateDocument(taskId, taskItem);
+                return Ok(createdDocument);
+            } 
+            catch (KeyNotFoundException ex)
+            {
+                return NotFound(ex.Message);
             }
-
-            var document = new Document
+            catch (InvalidOperationException ex)
             {
-                Title = taskItem.Title,
-                FilePath = taskItem.FilePath,
-                TaskId = taskItem.TaskId,
-            };
-
-            await _documentRepository.CreateDocument(document);
-            return Ok("Dosya başarıyla eklendi");
+                return BadRequest(ex.Message);
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(ex.Message);
+            }
         }
         [HttpDelete("Document/DeleteCoument/{documentId}")]
-        public async Task<ActionResult> DeleteDocumentById(int id)
+        public async Task<ActionResult> DeleteDocumentById(int documentId)
         {
 
-            var existedDocument = await _documentRepository.GetDocumentById(id);
+            var existedDocument = await _documentRepository.GetDocumentById(documentId);
             if (existedDocument == null)
                 return BadRequest("Geçerli belge bulunamadı");
 
@@ -44,9 +52,9 @@ namespace TM.UI.Controllers
         }
 
         [HttpGet("Document/GetDocumentById/{documentId}")]
-        public async Task<ActionResult> GetTaskItemById(int id)
+        public async Task<ActionResult> GetTaskItemById(int documentId)
         {
-            var existedPart = await _documentRepository.GetDocumentById(id);
+            var existedPart = await _documentRepository.GetDocumentById(documentId);
             if (existedPart == null)
             {
                 return BadRequest("İstenilen dosya bulunamadı");
@@ -63,19 +71,17 @@ namespace TM.UI.Controllers
             return Ok(documents);
         }
         [HttpPatch("Document/UpdateDocumentById/{documentId}")]
-        public async Task<ActionResult> UpdateTaskItemById(int id, Document updatedData)
+        public async Task<ActionResult> UpdateDocumentFilePathById(int documentId, string filePath)
         {
-            if (updatedData == null)
-                return BadRequest("Güncelleme verisi görülmedi");
-            var existedItem = await _documentRepository.UpdateDocumentById(id);
-            if (existedItem == null)
+            if (string.IsNullOrEmpty(filePath))
+                return BadRequest("Güncelleme verisi gönderilmedi");
+
+            var updatedItem = await _documentRepository.UpdateDocumentFilePathById(documentId, filePath);
+
+            if (updatedItem == null)
                 return NotFound("Dosya bulunamadı");
 
-            existedItem.Title = string.IsNullOrEmpty(updatedData.Title)
-                ? existedItem.Title
-                : updatedData.Title;
-
-            return Ok(existedItem);
+            return Ok(updatedItem);
         }
     }
 }

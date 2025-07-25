@@ -16,12 +16,8 @@ namespace TM.DAL.Entities.AppEntities
         public string Description { get; set; }
         public int? CurrentVersionId { get; set; }
         public DateTime CreatedDate { get; set; }
-
-        [JsonIgnore]
         public TaskVersion? CurrentVersion { get; set; }
-        [JsonIgnore]
         public ICollection<Document?> Documents { get; set; } = new List<Document>();
-        [JsonIgnore]
         public ICollection<TaskVersion?> Versions { get; set; } = new List<TaskVersion>();
     }
 }

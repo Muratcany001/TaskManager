@@ -5,7 +5,7 @@
 namespace TM.DAL.Migrations
 {
     /// <inheritdoc />
-    public partial class MigrationAdi : Migration
+    public partial class mig_3 : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)

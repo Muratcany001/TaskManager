@@ -16,19 +16,32 @@ namespace TM.DAL.Concrete
         {
             _context = context;
         }
-        public async Task<Document> CreateDocument(Document taskItem)
+
+        public async Task<Document> CreateDocument(int taskId , Document taskItem)
         {
+            var existedVersion = await _context.Tasks 
+                                               .Include(x=> x.CurrentVersion)
+                                               .FirstOrDefaultAsync(x=> x.Id == taskId);
+            if (existedVersion == null) 
+                return null;
+            taskItem.TaskId = taskId;
+            taskItem.TaskVersionId = existedVersion.CurrentVersionId;
+
             _context.Documents.Add(taskItem);
             await _context.SaveChangesAsync();
             return taskItem;
         }
-        public async Task<Document> UpdateDocumentById(int id)
+
+        public async Task<Document> UpdateDocumentFilePathById(int id, string filePath)
         {
-            var existedItem = _context.Documents.FirstOrDefault(x => x.Id == id);
+            var existedItem = await _context.Documents.FindAsync(id);
+
+            existedItem.FilePath = filePath;
             _context.Documents.Update(existedItem);
             await _context.SaveChangesAsync();
             return existedItem;
         }
+
         public async Task<List<Document>> GetAllDocuments()
         {
             var documents = await _context.Documents.
@@ -41,9 +54,12 @@ namespace TM.DAL.Concrete
             }
             return documents;
         }
-        public async Task<Document> GetDocumentById(int id)
+        public async Task<Document?> GetDocumentById(int id)
         {
-            return await _context.Documents.FindAsync(id);
+            return await _context.Documents
+                .Include(d => d.Task)
+                .Include(d => d.TaskVersionId)
+                .FirstOrDefaultAsync(d => d.Id == id);
         }
         public async Task<Document> DeleteDocumentById(int id)
         {

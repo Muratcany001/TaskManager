@@ -9,8 +9,8 @@ namespace TM.DAL.Abstract
 {
     public interface IDocumentRepository
     {
-        Task<Document> CreateDocument(Document taskItem);
-        Task<Document> UpdateDocumentById(int id);
+        Task<Document> CreateDocument(int taskId ,Document taskItem);
+        Task<Document> UpdateDocumentFilePathById(int id,string filePath);
         Task<Document> DeleteDocumentById(int id);
         Task<Document> GetDocumentById(int id);
         Task<List<Document>> GetAllDocuments();
