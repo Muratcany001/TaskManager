@@ -47,7 +47,7 @@ namespace TM.DAL.Concrete
                 Time = DateTime.UtcNow,
                 Status = status,
                 CreatedByUserId = LastUpdaterId,
-                Documents = currentDocs
+                Documents = copiedDocuments
             };
 
             await _context.Versions.AddAsync(newVersion);
@@ -64,8 +64,9 @@ namespace TM.DAL.Concrete
 
         public async Task<List<TaskVersion>> GetAllVersionsByTaskId(int taskId)
         {
-            var userTask = await _context.Versions.Where(x => x.TaskId == taskId)
+            var userTask = await _context.Versions
                                             .Include(x => x.Task)
+                                            .Where(x => x.TaskId == taskId)
                                             .ToListAsync();
             return userTask;
         }
