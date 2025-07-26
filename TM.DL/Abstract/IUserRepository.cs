@@ -14,6 +14,7 @@ namespace TM.DAL.Abstract
         User UpdatePasswordById(int id, string password);
         List<User> GetAllUsers();
         User GetUserById(int id);
+        User Login(string username, string password);
         User GetUserByEmail(string email);
     }
 }

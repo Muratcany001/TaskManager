@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Security.Cryptography;
 using System.Text;
 using System.Threading.Tasks;
 using TM.DAL.Abstract;
@@ -54,6 +55,21 @@ namespace TM.DAL.Concrete
             _context.Users.Remove(existedUser);
             _context.SaveChanges();
             return existedUser;
+        }
+
+        public User Login(string email, string password)
+        {
+            string hash = HashPasswordSHA256(password);
+            return _context.Users.FirstOrDefault(x=> x.Email == email && x.Password == hash);
+        }
+        private string HashPasswordSHA256(string password)
+        {
+            using (var sha256 = SHA256.Create())
+            {
+                byte[] passwordBytes = Encoding.UTF8.GetBytes(password);
+                byte[] hashBytes = sha256.ComputeHash(passwordBytes);
+                return Convert.ToBase64String(hashBytes);
+            }
         }
     }
 }

@@ -4,6 +4,7 @@ using System.Text;
 using TM.DAL.Abstract;
 using TM.DAL.Entities.AppEntities;
 using TM.DAL;
+using Microsoft.AspNetCore.Identity.Data;
 namespace TM.UI.Controllers
 {
         [ApiController]
@@ -78,8 +79,16 @@ namespace TM.UI.Controllers
             {
                 return Ok(_userRepository.DeleteUserById(id));
             }
+            [HttpPost("users/Login")]
+                public ActionResult Login([FromBody] LoginRequest request)
+                {
+                        var existedUser = _userRepository.Login(request.Email, request.Password);
+                    if (existedUser == null)
+                        return Unauthorized("Eposta veya şifre yanlış");
+                    return Ok(new { Message = "Giriş başarılı", UserId = existedUser.Id });
+        }
 
-            private string HashPasswordSHA256(string password)
+        private string HashPasswordSHA256(string password)
             {
                 using (var sha256 = SHA256.Create())
                 {
@@ -88,6 +97,11 @@ namespace TM.UI.Controllers
                     return Convert.ToBase64String(hashBytes);
                 }
             }
-        }
     }
+    public class LoginRequest
+    {
+        public string Email { get; set; }
+        public string Password { get; set; }
+    }
+}
 
