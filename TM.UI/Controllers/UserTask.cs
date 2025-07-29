@@ -76,15 +76,15 @@ namespace TM.UI.Controllers
             {
                 return await _taskRepository.GetTaskByDate(date) is { } result ? Ok(result) : NotFound("Task  bulunamadı.");
             }
-            [HttpGet("task/GetLastUpdaterNameById/{id}")]
-            public async Task<ActionResult> GetLastUpdater(int id)
+            [HttpGet("task/GetLastUpdaterNameById/{taskId}")]
+            public async Task<ActionResult> GetLastUpdater(int taskId)
             {
-                return await _taskRepository.GetLastUpdaterNameById(id) is string result ? Ok(result) : NotFound("Son kullanıcı bulunamadı");
+                return await _taskRepository.GetLastUpdaterNameById(taskId) is string result ? Ok(result) : NotFound("Son kullanıcı bulunamadı");
             }
-            [HttpGet("task/GetFirstUpdaterNameById/{id}")]
-            public async Task<ActionResult> GetFirstUpdater(int id)
+            [HttpGet("task/GetFirstUpdaterNameById/{taskId}")]
+            public async Task<ActionResult> GetFirstUpdater(int taskId)
             {
-                return await _taskRepository.GetFirstUpdaterNameById(id) is string result ? Ok(result) : NotFound("Son kullanıcı bulunamadı");
+                return await _taskRepository.GetFirstUpdaterNameById(taskId) is string result ? Ok(result) : NotFound("Son kullanıcı bulunamadı");
             }
 
         }

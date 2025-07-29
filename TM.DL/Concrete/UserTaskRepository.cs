@@ -66,13 +66,13 @@ namespace TM.DAL.Concrete
             await _context.SaveChangesAsync();
             return existedTask;
         }
-        public async Task<string> GetFirstUpdaterNameById(int id)
+        public async Task<string?> GetFirstUpdaterNameById(int id)
         {
             var existedUserId = await _context.Tasks.Where(x => x.Id == id).Select(x => x.FirstUpdater).FirstOrDefaultAsync();
             var userName = _context.Users.Where(x => x.Id == existedUserId).Select(x => x.Name).FirstOrDefault();
             return userName;
         }
-        public async Task<string> GetLastUpdaterNameById(int id)
+        public async Task<string?> GetLastUpdaterNameById(int id)
         {
             var existedUserId = await _context.Tasks.Where(x => x.Id == id).Select(x => x.LastUpdater).FirstOrDefaultAsync();
             var userName = _context.Users.Where(x => x.Id == existedUserId).Select(x => x.Name).FirstOrDefault();

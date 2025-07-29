@@ -11,7 +11,7 @@ namespace TM.DAL.Entities.AppEntities
     {
         public int Id { get; set; }
         public string Title { get; set; }
-        public DateTime CreatedDate { get; set; } = DateTime.Now;
+        public DateTime CreatedDate { get; set; } = DateTime.UtcNow;
         public string FilePath { get; set; }
         public int? TaskId { get; set; }
         public int? TaskVersionId { get; set; }

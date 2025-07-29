@@ -1,4 +1,4 @@
-using Microsoft.EntityFrameworkCore;
+ï»¿using Microsoft.EntityFrameworkCore;
 using System.Text.Json.Serialization;
 using TM.DAL;
 using TM.DAL.Abstract;
@@ -11,27 +11,26 @@ var builder = WebApplication.CreateBuilder(args);
 // DbContext
 builder.Services.AddDbContext<Context>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
+
 var MyAllowSpecificOrigins = "_myAllowSpecificOrigins";
 builder.Services.AddCors(options =>
 {
     options.AddPolicy(name: MyAllowSpecificOrigins,
-                      builder =>
+                      policyBuilder =>
                       {
-                          builder.WithOrigins("http://localhost:3000", // Example: your frontend development server
-                                              "https://myproductionapp.com") // Example: your production frontend domain
-                                 .AllowAnyHeader()
-                                 .AllowAnyMethod();
-                          // .AllowCredentials(); // Uncomment if you need to allow cookies/authentication headers
+                          policyBuilder.WithOrigins("https://localhost:4200", "http://localhost:4200" , "localhost:4200")
+                                       .AllowAnyHeader()
+                                       .AllowAnyMethod().AllowCredentials();
                       });
 });
 
-// Repository baðýmlýlýklarý
+// Repository baÄŸÄ±mlÄ±lÄ±klarÄ±
 builder.Services.AddScoped<ITaskRepository, UserTaskRepository>();
 builder.Services.AddScoped<ITaskVersionRepository, TaskVersionRepository>();
 builder.Services.AddScoped<IUserRepository, UserRepository>();
 builder.Services.AddScoped<IDocumentRepository, DocumentRepository>();
 
-// Controller ve JSON ayarlarý
+// Controller ve JSON ayarlarÄ±
 builder.Services.AddControllers()
     .AddJsonOptions(options =>
     {
@@ -43,11 +42,9 @@ builder.Services.AddControllers()
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
-
-
 var app = builder.Build();
 
-// Development ortamý için Swagger aktif
+// Swagger dev ortamÄ±nda aktif
 if (app.Environment.IsDevelopment())
 {
     app.UseSwagger();
@@ -55,6 +52,9 @@ if (app.Environment.IsDevelopment())
 }
 
 app.UseHttpsRedirection();
+
+// ðŸŸ¡ CORS politikasÄ± burada aktif edilmeli!
+app.UseCors(MyAllowSpecificOrigins);
 
 app.UseAuthorization();
 

@@ -35,6 +35,11 @@ namespace TM.UI.Controllers
                 {
                     return BadRequest("Geçersiz şifre");
                 }
+                var existedUser = _userRepository.GetUserByEmail(user.Email);
+                if (existedUser != null)
+                {
+                    return BadRequest("Kullanıcı zaten mevcut");
+                }
                 user.Password = HashPasswordSHA256(user.Password);
                 var createdUser = _userRepository.CreateUser(user);
                 return Ok(createdUser);
