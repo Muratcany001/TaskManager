@@ -78,13 +78,30 @@ namespace TM.DAL.Concrete
             var userName = _context.Users.Where(x => x.Id == existedUserId).Select(x => x.Name).FirstOrDefault();
             return userName;
         }
-        public async Task<UserTask> DeleteTaskById(int id)
+        public async Task<UserTask> DeleteTaskById(int taskId)
         {
-            var existedTask = await _context.Tasks.FindAsync(id);
-            _context.Tasks.Remove(existedTask);
+            var task = await _context.Tasks.FirstOrDefaultAsync(t => t.Id == taskId);
+            if (task == null)
+                return null;
+
+            task.CurrentVersionId = null;
             await _context.SaveChangesAsync();
-            return existedTask;
+
+            var documents = await _context.Documents.Where(d => d.TaskId == taskId).ToListAsync();
+            _context.Documents.RemoveRange(documents);
+
+            var versions = await _context.Versions.Where(v => v.TaskId == taskId).ToListAsync();
+            _context.Versions.RemoveRange(versions);
+
+            await _context.SaveChangesAsync();
+
+            _context.Tasks.Remove(task);
+
+            await _context.SaveChangesAsync();
+
+            return task;
         }
+
         public async Task<List<UserTask>> GetAllTasks()
         {
             return await _context.Tasks

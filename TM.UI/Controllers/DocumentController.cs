@@ -83,5 +83,13 @@ namespace TM.UI.Controllers
 
             return Ok(updatedItem);
         }
+        [HttpGet("Document/GetDocumentByTaskId/{taskId}")]
+        public async Task<ActionResult<List<Document>>> GetDocumentyByTaskId(int taskId)
+        {
+            var existedDocument = await _documentRepository.GetDocumentById(taskId);
+            if (existedDocument == null)
+                return BadRequest("Belge bulunamadı");
+            return Ok(existedDocument);
+        }
     }
 }

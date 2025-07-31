@@ -2,6 +2,7 @@
 using TM.DAL.Abstract;
 using TM.DAL.Entities.AppEntities;
 using TM.DAL;
+using Microsoft.EntityFrameworkCore;
 namespace TM.UI.Controllers
 {
         [ApiController]
@@ -87,6 +88,6 @@ namespace TM.UI.Controllers
                 return await _taskRepository.GetFirstUpdaterNameById(taskId) is string result ? Ok(result) : NotFound("Son kullanıcı bulunamadı");
             }
 
-        }
     }
+}
 

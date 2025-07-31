@@ -29,10 +29,10 @@ namespace TM.DAL
                 .IsRequired(false);
 
             modelBuilder.Entity<Document>()
-                .HasOne(d => d.Task)
-                .WithMany(ut => ut.Documents)
-                .HasForeignKey(d => d.TaskId)
-                .OnDelete(DeleteBehavior.Restrict);
+               .HasOne(d => d.Task)
+               .WithMany(ut => ut.Documents)
+               .HasForeignKey(d => d.TaskId)
+               .OnDelete(DeleteBehavior.Restrict);
 
             modelBuilder.Entity<UserTask>()
                 .HasOne<User>()

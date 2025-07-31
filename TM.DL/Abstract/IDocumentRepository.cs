@@ -13,6 +13,6 @@ namespace TM.DAL.Abstract
         Task<Document> UpdateDocumentFilePathById(int id,string filePath);
         Task<Document> DeleteDocumentById(int id);
         Task<Document> GetDocumentById(int id);
-        Task<List<Document>> GetAllDocuments();
+        Task<List<Document>> GetAllDocuments();   
     }
 }

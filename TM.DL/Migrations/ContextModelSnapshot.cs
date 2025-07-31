@@ -159,14 +159,16 @@ namespace TM.DAL.Migrations
                 {
                     b.HasOne("TM.DAL.Entities.AppEntities.UserTask", "Task")
                         .WithMany("Documents")
-                        .HasForeignKey("TaskId")
+                        .HasForeignKey("TaskId");
+
+                    b.HasOne("TM.DAL.Entities.AppEntities.TaskVersion", "TaskVersion")
+                        .WithMany("Documents")
+                        .HasForeignKey("TaskVersionId")
                         .OnDelete(DeleteBehavior.Restrict);
 
-                    b.HasOne("TM.DAL.Entities.AppEntities.TaskVersion", null)
-                        .WithMany("Documents")
-                        .HasForeignKey("TaskVersionId");
-
                     b.Navigation("Task");
+
+                    b.Navigation("TaskVersion");
                 });
 
             modelBuilder.Entity("TM.DAL.Entities.AppEntities.TaskVersion", b =>

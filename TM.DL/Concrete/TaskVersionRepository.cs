@@ -1,7 +1,9 @@
 ﻿using Microsoft.EntityFrameworkCore;
+using Microsoft.Identity.Client;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Net.Http.Headers;
 using System.Text;
 using System.Threading.Tasks;
 using TM.DAL.Abstract;
@@ -133,14 +135,17 @@ namespace TM.DAL.Concrete
 
         public async Task<int?> GetVersionByTaskId(int id)
         {
-            var existedVersion = await _context.Tasks.Include(x => x.Versions)
-                                                     .Include(x => x.CurrentVersion)
-                                                     .FirstOrDefaultAsync(x => x.Id == id);
+            var existedTask = await _context.Tasks
+                                            .Include(x => x.CurrentVersion)
+                                            .FirstOrDefaultAsync(x => x.Id == id);
 
-            var versionNumber = existedVersion.CurrentVersion.VersionNumber;
-            if (versionNumber == null)
+            if (existedTask == null)
                 return null;
-            return versionNumber;
+
+            if (existedTask.CurrentVersion == null)
+                return null;
+
+            return existedTask.CurrentVersion.VersionNumber;
         }
 
         public async Task<TaskVersion> UpdateVersionByTaskId(int id, Version version)
@@ -152,6 +157,15 @@ namespace TM.DAL.Concrete
             await _context.SaveChangesAsync();
             return existedVersion;
         }
+        public async Task<TaskVersion?> GetVersionByVersionId(int versionId)
+        {
+            var version = await _context.Versions
+                                        .Include(x => x.Documents)
+                                        .FirstOrDefaultAsync(x => x.Id == versionId);
+
+            return version;
+        }
+
 
         public async Task<TaskVersion> GetBackVersionByVersionNumber(int taskId, int versionId, int lastUpdaterId)
         {
@@ -183,6 +197,26 @@ namespace TM.DAL.Concrete
             existedVersion.Status = status;
             await _context.SaveChangesAsync();
             return existedVersion;
+        }
+        public async Task<List<TaskVersion>> GetAllVersionByTaskId( int taskId)
+        {
+            var existedTask = await _context.Tasks.FindAsync(taskId);
+            if (existedTask == null)
+                return null;
+
+            return await _context.Versions
+                                    .Where(x => x.TaskId == taskId)
+                                    .Include( x=> x.Task)
+                                    .ToListAsync();
+        }
+        public async Task<List<TaskVersion>> GetDocumentByTaskId(int taskId)
+        {
+            var result = await _context.Versions
+                .Where(tv => tv.TaskId == taskId)
+                .Include(tv => tv.Documents)
+                .ToListAsync();
+
+            return result;
         }
     }
 }

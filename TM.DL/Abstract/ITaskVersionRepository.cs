@@ -17,5 +17,8 @@ namespace TM.DAL.Abstract
         Task<TaskVersion> ChangeVersionStatusById(int id, string status);
         Task<TaskVersion> GetBackVersionByVersionNumber(int taskId, int versionId, int lastUpdaterId);
         Task<List<TaskVersion>> GetAllVersionsByTaskId(int id);
+        Task<List<TaskVersion>> GetDocumentByTaskId(int taskId);
+        Task<List<TaskVersion>> GetAllVersionByTaskId(int taskId);
+        Task<TaskVersion> GetVersionByVersionId(int versionId);
     }
 }
