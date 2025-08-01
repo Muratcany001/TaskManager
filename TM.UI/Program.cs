@@ -1,5 +1,6 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using System.Text.Json.Serialization;
+using TM.BLL;
 using TM.DAL;
 using TM.DAL.Abstract;
 using TM.DAL.Concrete;
@@ -29,6 +30,7 @@ builder.Services.AddScoped<ITaskRepository, UserTaskRepository>();
 builder.Services.AddScoped<ITaskVersionRepository, TaskVersionRepository>();
 builder.Services.AddScoped<IUserRepository, UserRepository>();
 builder.Services.AddScoped<IDocumentRepository, DocumentRepository>();
+builder.Services.AddScoped<IGoogleDriveService, GoogleDriveService>();
 
 // Controller ve JSON ayarları
 builder.Services.AddControllers()

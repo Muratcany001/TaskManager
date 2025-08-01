@@ -13,8 +13,8 @@ namespace TM.UI.Controllers
             _documentRepository = documentRepository;
         }
 
-        [HttpPost("Document/CreateDocument")]
-        public async Task<ActionResult> CreateTaskItem(int taskId, Document taskItem)
+        [HttpPost("Document/CreateDocument/{taskId}")]
+        public async Task<ActionResult> CreateTaskItem(int taskId, Document taskItem, IFormFile file)
         {
             try
             {
@@ -23,7 +23,7 @@ namespace TM.UI.Controllers
                     return BadRequest("Document cannot be null");
                 }
 
-                var createdDocument = await _documentRepository.CreateDocument(taskId, taskItem);
+                var createdDocument = await _documentRepository.CreateDocument(taskId, taskItem, file);
                 return Ok(createdDocument);
             } 
             catch (KeyNotFoundException ex)

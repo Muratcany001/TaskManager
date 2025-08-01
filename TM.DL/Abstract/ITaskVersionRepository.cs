@@ -14,7 +14,7 @@ namespace TM.DAL.Abstract
         Task<TaskVersion> DeleteLatestVersionByTaskId(int id);
         Task<TaskVersion> DeleteVersionByTaskId(int id);
         Task<int?> GetVersionByTaskId(int id);
-        Task<TaskVersion> ChangeVersionStatusById(int id, string status);
+        Task<TaskVersion> ChangeVersionStatusById(int versionId, string status);
         Task<TaskVersion> GetBackVersionByVersionNumber(int taskId, int versionId, int lastUpdaterId);
         Task<List<TaskVersion>> GetAllVersionsByTaskId(int id);
         Task<List<TaskVersion>> GetDocumentByTaskId(int taskId);

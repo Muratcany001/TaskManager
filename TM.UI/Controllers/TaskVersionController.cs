@@ -62,19 +62,19 @@ namespace TM.UI.Controllers
                 return BadRequest("Versiyon veya Task bulunamadı");
             return Ok(latestVersion);
         }
-        [HttpPost("version/ChangeVersionStatus/{taskId}/{status}")]
-        public async Task<IActionResult> ChangeVersionStatusById(int taskId, string status)
+        [HttpPost("version/ChangeVersionStatus/{versionId}/{status}")]
+        public async Task<IActionResult> ChangeVersionStatusById(int versionId, string status)
         {
             if (string.IsNullOrEmpty(status))
                 return BadRequest("Geçersiz status değeri");
 
-            var existedVersion = await _taskVersionRepository.GetVersionByTaskId(taskId);
+            var existedVersion = await _taskVersionRepository.GetVersionByVersionId(versionId);
             if (existedVersion == null)
                 return BadRequest("Geçerli task veya versiyon bulunamadı");
 
-            await _taskVersionRepository.ChangeVersionStatusById(taskId, status);
-            var updatedStatus = _taskVersionRepository.GetVersionByTaskId(taskId);
+            var updatedStatus = await _taskVersionRepository.ChangeVersionStatusById(versionId, status);
             return Ok(updatedStatus.Status);
+
         }
 
         [HttpGet("version/GetVersion/{taskId}")]

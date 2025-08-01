@@ -78,6 +78,7 @@ namespace TM.DAL.Concrete
             var existedTask = await _context.Tasks
                 .Include(x => x.CurrentVersion)
                 .Include(x => x.Versions)
+                    .ThenInclude(x=> x.Documents)
                 .FirstOrDefaultAsync(x => x.Id == taskId);
 
             if (existedTask == null)
@@ -101,11 +102,14 @@ namespace TM.DAL.Concrete
                 {
                     existedTask.CurrentVersionId = backVersion.Id;
                     existedTask.CurrentVersion = backVersion;
+
+                    var restoredDocuments = backVersion.Documents.ToList();
                 }
 
                 await _context.SaveChangesAsync();
                 await transaction.CommitAsync();
                 return latestVersion;
+
             }
             catch
             {
@@ -188,13 +192,14 @@ namespace TM.DAL.Concrete
             return existedVersion;
         }
 
-        public async Task<TaskVersion> ChangeVersionStatusById(int id, string status)
+        public async Task<TaskVersion> ChangeVersionStatusById(int versionId, string status)
         {
-            var existedVersion = await _context.Versions.FindAsync(id);
+            var existedVersion = await _context.Versions.FindAsync(versionId);
             if (existedVersion == null)
                 return null;
 
             existedVersion.Status = status;
+            _context.Update(existedVersion);
             await _context.SaveChangesAsync();
             return existedVersion;
         }
