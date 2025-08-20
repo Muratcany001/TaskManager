@@ -1,15 +1,20 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using System.Text.Json.Serialization;
-using TM.BLL;
+using TM.BLL.GoogleDriveService;
+using FluentValidation;
 using TM.DAL;
+using AutoMapper;
 using TM.DAL.Abstract;
 using TM.DAL.Concrete;
 using TM.DAL.Entities;
 using TM.DAL.Entities.AppEntities;
+using FluentValidation.AspNetCore;
+using TM.BLL.Utilities.ValidationRules;
+using Dtos;
+using TM.BLL.Mappings;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// DbContext
 builder.Services.AddDbContext<Context>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
 
@@ -25,28 +30,31 @@ builder.Services.AddCors(options =>
                       });
 });
 
-// Repository bağımlılıkları
+
+
+
 builder.Services.AddScoped<ITaskRepository, UserTaskRepository>();
 builder.Services.AddScoped<ITaskVersionRepository, TaskVersionRepository>();
 builder.Services.AddScoped<IUserRepository, UserRepository>();
 builder.Services.AddScoped<IDocumentRepository, DocumentRepository>();
 builder.Services.AddScoped<IGoogleDriveService, GoogleDriveService>();
 
-// Controller ve JSON ayarları
 builder.Services.AddControllers()
     .AddJsonOptions(options =>
     {
         options.JsonSerializerOptions.ReferenceHandler = ReferenceHandler.IgnoreCycles;
         options.JsonSerializerOptions.WriteIndented = true;
-    });
-
-// Swagger
+    })
+    .AddFluentValidation(config =>
+     {
+         config.RegisterValidatorsFromAssemblyContaining<LoginDtoValidator>();
+     });
+builder.Services.AddAutoMapper(typeof(UserProfile));
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
 var app = builder.Build();
 
-// Swagger dev ortamında aktif
 if (app.Environment.IsDevelopment())
 {
     app.UseSwagger();
@@ -55,7 +63,6 @@ if (app.Environment.IsDevelopment())
 
 app.UseHttpsRedirection();
 
-// 🟡 CORS politikası burada aktif edilmeli!
 app.UseCors(MyAllowSpecificOrigins);
 
 app.UseAuthorization();

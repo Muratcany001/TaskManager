@@ -9,7 +9,7 @@ namespace TM.DAL.Abstract
 {
     public interface IDocumentRepository
     {
-        Task<Document> CreateDocument(int taskId ,Document taskItem, IFormFile file);
+        Task<Document> CreateDocument(int taskId, string title, IFormFile file);
         Task<Document> UpdateDocumentFilePathById(int id, IFormFile file);
         Task<Document> DeleteDocumentById(int id);
         Task<Document> GetDocumentById(int id);

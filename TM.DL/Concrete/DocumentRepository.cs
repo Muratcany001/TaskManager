@@ -8,10 +8,11 @@ using System.Text;
 using System.Threading.Tasks;
 using TM.DAL.Abstract;
 using TM.DAL.Entities.AppEntities;
-using TM.BLL;
 using System.Text.RegularExpressions;
+using System.Reflection.Metadata.Ecma335;
+using TM.BLL.GoogleDriveService;
 namespace TM.DAL.Concrete
-{  
+{
     public class DocumentRepository  : IDocumentRepository
     {
         private readonly Context _context;
@@ -23,26 +24,33 @@ namespace TM.DAL.Concrete
             _googleDriveService = googleDriveService;
         }
 
-        public async Task<Document> CreateDocument(int taskId , Document taskItem, IFormFile file)
+        public async Task<Document> CreateDocument(int taskId , string title,  IFormFile file)
         {
-            var existedVersion = await _context.Tasks 
-                                               .Include(x=> x.CurrentVersion)
-                                               .FirstOrDefaultAsync(x=> x.Id == taskId);
-            if (existedVersion == null) 
+            var existedVersion = await _context.Tasks
+                                   .Include(x => x.CurrentVersion)
+                                   .FirstOrDefaultAsync(x => x.Id == taskId);
+
+            if (existedVersion == null)
                 return null;
-            
-            taskItem.TaskId = taskId;
-            taskItem.TaskVersionId = existedVersion.CurrentVersionId;
+
+            var document = new Document
+            {
+                TaskId = taskId,
+                Title = title
+
+            };
 
             if (file != null)
             {
                 var uploadedFilePath = await _googleDriveService.UploadFileAsync(file);
-                taskItem.FilePath = uploadedFilePath;
+                document.FilePath = uploadedFilePath;
             }
 
-            _context.Documents.Add(taskItem);
+            _context.Documents.Add(document);
             await _context.SaveChangesAsync();
-            return taskItem;
+
+            return document;
+
         }
 
         public async Task<Document> UpdateDocumentFilePathById(int id, IFormFile file)
@@ -52,7 +60,13 @@ namespace TM.DAL.Concrete
 
             if (file != null)
             {
-                var fileId = existedItem.FilePath;
+                var match = Regex.Match(existedItem.FilePath, @"/d/([^/]+)");
+                if (!match.Success)
+                {
+                    throw new InvalidOperationException("Google Drive dosya linki geçersiz.");
+                }
+                var fileId = match.Groups[1].Value;
+
                 var uploadedFilePath = await _googleDriveService.UpdateFileAsync(fileId, file);
                 existedItem.FilePath = uploadedFilePath;
             }

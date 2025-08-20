@@ -5,7 +5,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace TM.BLL
+namespace TM.BLL.GoogleDriveService
 {
     public interface IGoogleDriveService
     {

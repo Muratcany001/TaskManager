@@ -13,19 +13,19 @@ namespace TM.UI.Controllers
             _documentRepository = documentRepository;
         }
 
-        [HttpPost("Document/CreateDocument/{taskId}")]
-        public async Task<ActionResult> CreateTaskItem(int taskId, Document taskItem, IFormFile file)
+        [HttpPost("Document/CreateDocument/{taskId}/{title}")]
+        public async Task<ActionResult> CreateTaskItem(int taskId, string title, IFormFile file)
         {
             try
             {
-                if (taskItem == null)
+                if (file == null)
                 {
                     return BadRequest("Document cannot be null");
                 }
 
-                var createdDocument = await _documentRepository.CreateDocument(taskId, taskItem, file);
+                var createdDocument = await _documentRepository.CreateDocument(taskId, title, file);
                 return Ok(createdDocument);
-            } 
+            }
             catch (KeyNotFoundException ex)
             {
                 return NotFound(ex.Message);
@@ -38,6 +38,7 @@ namespace TM.UI.Controllers
             {
                 return BadRequest(ex.Message);
             }
+            
         }
         [HttpDelete("Document/DeleteCoument/{documentId}")]
         public async Task<ActionResult> DeleteDocumentById(int documentId)
@@ -71,12 +72,12 @@ namespace TM.UI.Controllers
             return Ok(documents);
         }
         [HttpPatch("Document/UpdateDocumentById/{documentId}")]
-        public async Task<ActionResult> UpdateDocumentFilePathById(int documentId, string filePath)
+        public async Task<ActionResult> UpdateDocumentFilePathById(int documentId, IFormFile file)
         {
-            if (string.IsNullOrEmpty(filePath))
+            if (file == null)
                 return BadRequest("Güncelleme verisi gönderilmedi");
 
-            var updatedItem = await _documentRepository.UpdateDocumentFilePathById(documentId, filePath);
+            var updatedItem = await _documentRepository.UpdateDocumentFilePathById(documentId, file);
 
             if (updatedItem == null)
                 return NotFound("Dosya bulunamadı");

@@ -7,14 +7,11 @@ using TM.DAL.Entities.AppEntities;
 
 namespace TM.DAL.Abstract
 {
-    public interface IUserRepository
+    public interface IUserRepository : IBaseRepository<User>
     {
-        User CreateUser(User user);
-        User DeleteUserById(int id);
-        User UpdatePasswordById(int id, string password);
-        List<User> GetAllUsers();
-        User GetUserById(int id);
-        User Login(string username, string password);
-        User GetUserByEmail(string email);
+        Task<User> GetByEmailAsync(string email);
+        Task<List<User>> GetActiveUsersAsync();
+        Task<User> GetUserWithRolesAsync(int id);
+        Task<bool> EmailExistsAsync(string email);
     }
 }
