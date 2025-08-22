@@ -17,6 +17,7 @@ namespace TM.DAL.Entities.AppEntities
         public int? TaskId { get; set; }
         public UserTask? Task { get; set; }
         public List<Document> Documents { get; set; } = new List<Document>();
+        public bool IsActive { get; set; }
 
     }
 }

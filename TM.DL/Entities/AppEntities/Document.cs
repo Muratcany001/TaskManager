@@ -16,6 +16,7 @@ namespace TM.DAL.Entities.AppEntities
         public int? TaskId { get; set; }
         public int? TaskVersionId { get; set; }
         public UserTask? Task { get; set; }
+        public bool IsActive { get; set; }
 
     }
 }

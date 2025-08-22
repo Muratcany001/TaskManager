@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using Dtos;
 using TM.DAL.Abstract;
 using TM.DAL.Entities.AppEntities;
 
@@ -17,21 +18,18 @@ namespace TM.DAL.Concrete
             _context = context;
         }
 
-        public async Task<UserTask> CreateTask(UserTask task)
+        public async Task<UserTask> CreateTask(CreateTaskDto task)
         {
             using var transaction = await _context.Database.BeginTransactionAsync();
 
             try
             {
-                task.CreatedDate = DateTime.UtcNow;
-
                 await _context.Tasks.AddAsync(task);
                 await _context.SaveChangesAsync();
 
 
                 var firstVersion = new TaskVersion
                 {
-                    TaskId = task.Id,
                     VersionNumber = 1,
                     Time = DateTime.UtcNow,
                     Status = "Active",
@@ -129,7 +127,7 @@ namespace TM.DAL.Concrete
         }
         public async Task<UserTask> GetTaskByDate(string date)
         {
-            return (await _context.Tasks.FirstOrDefaultAsync(x => x.CreatedDate.Equals(date)));
+            return (await _context.Tasks.FirstOrDefaultAsync(x => x.CreateDate.Equals(date)));
         }
     }
 }

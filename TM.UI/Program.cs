@@ -49,7 +49,8 @@ builder.Services.AddControllers()
      {
          config.RegisterValidatorsFromAssemblyContaining<LoginDtoValidator>();
      });
-builder.Services.AddAutoMapper(typeof(UserProfile));
+
+builder.Services.AddAutoMapper(typeof(Program));
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 

@@ -40,22 +40,17 @@ namespace TM.BLL.Services.UserService
 
         public async Task<ResultViewModel<UserDto>> CreateUserAsync(RegisterDto createUserDto)
         {
-            // 1. Validation
             var validationResult = await _createUserValidator.ValidateAsync(createUserDto);
             if (!validationResult.IsValid)
             {
                 var errorMessages = validationResult.Errors.Select(e => e.ErrorMessage).ToList();
                 return ResultViewModel<UserDto>.Failure("Lütfen girdiğiniz bilgileri kontrol edin.", errorMessages, 400);
             }
-
-            // 2. Email kontrolü
             var emailExists = await _userRepository.EmailExistsAsync(createUserDto.Email);
             if (emailExists)
             {
                 return ResultViewModel<UserDto>.Failure("Bu email adresi zaten kullanılıyor.");
             }
-
-            // 3. User oluştur
             var user = _mapper.Map<User>(createUserDto);
             user.Password = _hashService.HashPassword(createUserDto.Password);
             user.IsActive = true;
@@ -89,7 +84,6 @@ namespace TM.BLL.Services.UserService
 
         public async Task<ResultViewModel<UserDto>> UpdateUserAsync(int id, UpdateUserDto updateUserDto)
         {
-            // 1. Validation
             var validationResult = await _updateUserValidator.ValidateAsync(updateUserDto);
             if (!validationResult.IsValid)
             {
@@ -97,14 +91,12 @@ namespace TM.BLL.Services.UserService
                 return ResultViewModel<UserDto>.Failure("Lütfen girdiğiniz bilgileri kontrol edin.", errorMessages, 400);
             }
 
-            // 2. User kontrolü
             var user = await _userRepository.GetByIdAsync(id);
             if (user == null || !user.IsActive)
             {
                 return ResultViewModel<UserDto>.Failure("Kullanıcı bulunamadı.", null, 404);
             }
 
-            // 3. Email değişmişse kontrol et
             if (user.Email != updateUserDto.Email)
             {
                 var emailExists = await _userRepository.EmailExistsAsync(updateUserDto.Email);
@@ -114,7 +106,6 @@ namespace TM.BLL.Services.UserService
                 }
             }
 
-            // 4. Update
             _mapper.Map(updateUserDto, user);
             user.UpdatedAt = DateTime.Now;
 
@@ -126,7 +117,6 @@ namespace TM.BLL.Services.UserService
 
         public async Task<ResultViewModel<object>> UpdatePasswordAsync(int id, UpdatePasswordDto updatePasswordDto)
         {
-            // 1. Validation
             var validationResult = await _updatePasswordValidator.ValidateAsync(updatePasswordDto);
             if (!validationResult.IsValid)
             {
@@ -134,20 +124,17 @@ namespace TM.BLL.Services.UserService
                 return ResultViewModel<object>.Failure("Lütfen girdiğiniz bilgileri kontrol edin.", errorMessages, 400);
             }
 
-            // 2. User kontrolü
             var user = await _userRepository.GetByIdAsync(id);
             if (user == null || !user.IsActive)
             {
                 return ResultViewModel<object>.Failure("Kullanıcı bulunamadı.", null, 404);
             }
 
-            // 3. Mevcut şifre kontrolü
             if (!_hashService.VerifyPassword(updatePasswordDto.CurrentPassowrd, user.Password))
             {
                 return ResultViewModel<object>.Failure("Mevcut şifre hatalı.", null, 400);
             }
 
-            // 4. Şifre güncelle
             user.Password = _hashService.HashPassword(updatePasswordDto.NewPassword);
             user.UpdatedAt = DateTime.Now;
 
@@ -164,7 +151,6 @@ namespace TM.BLL.Services.UserService
                 return ResultViewModel<object>.Failure("Kullanıcı bulunamadı.", null, 404);
             }
 
-            // Soft delete
             user.IsActive = false;
             user.UpdatedAt = DateTime.Now;
 
