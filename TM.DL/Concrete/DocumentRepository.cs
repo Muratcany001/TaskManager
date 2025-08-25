@@ -10,18 +10,16 @@ using TM.DAL.Abstract;
 using TM.DAL.Entities.AppEntities;
 using System.Text.RegularExpressions;
 using System.Reflection.Metadata.Ecma335;
-using TM.BLL.GoogleDriveService;
 namespace TM.DAL.Concrete
 {
     public class DocumentRepository  : IDocumentRepository
     {
         private readonly Context _context;
-        private readonly IGoogleDriveService _googleDriveService;
         
-        public DocumentRepository(Context context, IGoogleDriveService googleDriveService)
+        public DocumentRepository(Context context)
         {
             _context = context;
-            _googleDriveService = googleDriveService;
+            
         }
 
         public async Task<Document> CreateDocument(int taskId , string title,  IFormFile file)

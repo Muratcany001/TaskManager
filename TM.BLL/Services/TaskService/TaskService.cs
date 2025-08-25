@@ -4,6 +4,7 @@ using Microsoft.EntityFrameworkCore;
 using TM.BLL.ViewModels;
 using TM.DAL;
 using TM.DAL.Abstract;
+using TM.DAL.Concrete;
 using TM.DAL.Entities.AppEntities;
 
 namespace TM.BLL.Services.TaskService;
@@ -57,10 +58,10 @@ public class TaskService : ITaskService
     public async Task<ResultViewModel<UserTask>> UpdateTaskById(int id, UpdateTaskDto updateTaskDto)
     {
 
-        var exsitedTask = await  _taskRepository.GetByIdAsync(id);
+        var exsitedTask = await _taskRepository.GetByIdAsync(id);
         _mapper.Map(updateTaskDto, exsitedTask);
         await _taskRepository.UpdateAsync(exsitedTask);
         return ResultViewModel<UserTask>.Success(exsitedTask, "Task updated successfully.", 200);
 
-    }  
+    }
 }

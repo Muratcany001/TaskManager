@@ -7,127 +7,218 @@ using System.Threading.Tasks;
 using Dtos;
 using TM.DAL.Abstract;
 using TM.DAL.Entities.AppEntities;
+using TM.BLL.ViewModels;
 
 namespace TM.DAL.Concrete
 {
-    public class UserTaskRepository : ITaskRepository
+    public class UserTaskRepository : BaseRepository<UserTask>,  ITaskRepository
     {
         private readonly Context _context;
-        public UserTaskRepository(Context context)
+
+        public UserTaskRepository(Context context) : base(context)
         {
             _context = context;
         }
 
-        public async Task<UserTask> CreateTask(CreateTaskDto task)
+        public async Task<ResultViewModel<UserTask>> GetTaskById(int id)
         {
-            using var transaction = await _context.Database.BeginTransactionAsync();
-
             try
             {
-                await _context.Tasks.AddAsync(task);
-                await _context.SaveChangesAsync();
+                var task = await GetAsync(
+                    predicate: t => t.Id == id,
+                    includeFunc: query => query
 
+                        .Include(t => t.CurrentVersion)
+                        .Include(t => t.Versions)
+                        .Include(t => t.Documents)
+                        );
 
-                var firstVersion = new TaskVersion
+                if (task == null)
                 {
-                    VersionNumber = 1,
-                    Time = DateTime.UtcNow,
-                    Status = "Active",
-                    CreatedByUserId = task.FirstUpdater
+                    return new ResultViewModel<UserTask>
+                    {
+                        Data = null,
+                        IsSuccess = false,
+                        Message = "Task not found"
+                    };
+                }
+
+                return new ResultViewModel<UserTask>
+                {
+                    Data = task,
+                    IsSuccess = true,
+                    Message = "Task retrieved successfully"
                 };
+            }
+            catch (Exception ex)
+            {
+                return new ResultViewModel<UserTask>
+                {
+                    Data = null,
+                    IsSuccess = false,
+                    Message = $"Failed to get task: {ex.Message}"
+                };
+            }
+        }
 
-                await _context.Versions.AddAsync(firstVersion);
-                await _context.SaveChangesAsync();
-
-                task.CurrentVersionId = firstVersion.Id;
-                _context.Tasks.Update(task);
-                await _context.SaveChangesAsync();
-
-                await transaction.CommitAsync();
-
-                return await _context.Tasks
+        public async Task<ResultViewModel<UserTask>> GetTaskByVersionId(int versionId)
+        {
+            try
+            {
+                var task = await GetAsync(
+                predicate: t => t.CurrentVersionId == versionId,
+                includeFunc: q => q
                     .Include(t => t.CurrentVersion)
                     .Include(t => t.Versions)
                     .Include(t => t.Documents)
-                    .FirstOrDefaultAsync(t => t.Id == task.Id);
+            );
+
+                if (task == null)
+                {
+                    return new ResultViewModel<UserTask>
+                    {
+                        Data = null,
+                        IsSuccess = false,
+                        Message = "Task not found for the given version ID"
+                    };
+                }
+
+                return new ResultViewModel<UserTask>
+                {
+                    Data = task,
+                    IsSuccess = true,
+                    Message = "Task retrieved successfully"
+                };
             }
-            catch (Exception)
+            catch (Exception ex)
             {
-                await transaction.RollbackAsync();
-                throw;
+                return new ResultViewModel<UserTask>
+                {
+                    Data = null,
+                    IsSuccess = false,
+                    Message = $"Failed to get task: {ex.Message}"
+                };
             }
         }
-        public async Task<UserTask> UpdateTaskById(int id)
+
+        public async Task<ResultViewModel<UserTask>> GetTaskByVersion(int version)
         {
-            var existedTask = await _context.Tasks.FindAsync(id);
-            _context.Tasks.Update(existedTask);
-            await _context.SaveChangesAsync();
-            return existedTask;
-        }
-        public async Task<string?> GetFirstUpdaterNameById(int id)
-        {
-            var existedUserId = await _context.Tasks.Where(x => x.Id == id).Select(x => x.FirstUpdater).FirstOrDefaultAsync();
-            var userName = _context.Users.Where(x => x.Id == existedUserId).Select(x => x.Name).FirstOrDefault();
-            return userName;
-        }
-        public async Task<string?> GetLastUpdaterNameById(int id)
-        {
-            var existedUserId = await _context.Tasks.Where(x => x.Id == id).Select(x => x.LastUpdater).FirstOrDefaultAsync();
-            var userName = _context.Users.Where(x => x.Id == existedUserId).Select(x => x.Name).FirstOrDefault();
-            return userName;
-        }
-        public async Task<UserTask> DeleteTaskById(int taskId)
-        {
-            var task = await _context.Tasks.FirstOrDefaultAsync(t => t.Id == taskId);
-            if (task == null)
-                return null;
+            try
+            {
+                var task = await GetAsync(
+                    predicate: t => t.CurrentVersion.VersionNumber == version,
+                    includeFunc: q => q
+                    .Include(t => t.CurrentVersion)
+                    .Include(t => t.Versions)
+                    .Include(t => t.Documents)
+                    );
 
-            task.CurrentVersionId = null;
-            await _context.SaveChangesAsync();
+                if (task == null)
+                {
+                    return new ResultViewModel<UserTask>
+                    {
+                        Data = null,
+                        IsSuccess = false,
+                        Message = "Task not found for the given version"
+                    };
+                }
 
-            var documents = await _context.Documents.Where(d => d.TaskId == taskId).ToListAsync();
-            _context.Documents.RemoveRange(documents);
-
-            var versions = await _context.Versions.Where(v => v.TaskId == taskId).ToListAsync();
-            _context.Versions.RemoveRange(versions);
-
-            await _context.SaveChangesAsync();
-
-            _context.Tasks.Remove(task);
-
-            await _context.SaveChangesAsync();
-
-            return task;
+                return new ResultViewModel<UserTask>
+                {
+                    Data = task,
+                    IsSuccess = true,
+                    Message = "Task retrieved successfully"
+                };
+            }
+            catch (Exception ex)
+            {
+                return new ResultViewModel<UserTask>
+                {
+                    Data = null,
+                    IsSuccess = false,
+                    Message = $"Failed to get task: {ex.Message}"
+                };
+            }
         }
 
-        public async Task<List<UserTask>> GetAllTasks()
+        public async Task<ResultViewModel<UserTask>> GetTaskByTitle(string title)
         {
-            return await _context.Tasks
-                .Include(x => x.CurrentVersion)
-                .Include(x => x.Documents)
-                .AsSplitQuery()
-                .ToListAsync();
-        }
-        public async Task<UserTask> GetTaskById(int id)
-        {
-            return await _context.Tasks.FindAsync(id);
-        }
-        public async Task<UserTask> GetTaskByVersionId(int VersionId)
-        {
-            return await _context.Tasks.FirstOrDefaultAsync(x => x.CurrentVersionId == VersionId);
-        }
-        public async Task<UserTask> GetTaskByVersion(int version)
-        {
+            try
+            {
+                var task = await GetAsync(
+                    predicate: t => t.Title.Equals(title),
+                    includeFunc: q => q
+                    .Include(t => t.CurrentVersion)
+                    .Include(t => t.Versions)
+                    .Include(t => t.Documents)
+                    );
 
-            return await _context.Tasks.FirstOrDefaultAsync(x => x.CurrentVersion.VersionNumber == version);
+                if (task == null)
+                {
+                    return new ResultViewModel<UserTask>
+                    {
+                        Data = null,
+                        IsSuccess = false,
+                        Message = "Task not found with the given title"
+                    };
+                }
+
+                return new ResultViewModel<UserTask>
+                {
+                    Data = task,
+                    IsSuccess = true,
+                    Message = "Task retrieved successfully"
+                };
+            }
+            catch (Exception ex)
+            {
+                return new ResultViewModel<UserTask>
+                {
+                    Data = null,
+                    IsSuccess = false,
+                    Message = $"Failed to get task: {ex.Message}"
+                };
+            }
         }
-        public async Task<UserTask> GetTaskByTitle(string title)
+
+        public async Task<ResultViewModel<UserTask>> GetTaskByDate(string date)
         {
-            return await _context.Tasks.FirstOrDefaultAsync(x => x.Title.Equals(title));
-        }
-        public async Task<UserTask> GetTaskByDate(string date)
-        {
-            return (await _context.Tasks.FirstOrDefaultAsync(x => x.CreateDate.Equals(date)));
+            try
+            {
+                var task = await GetAsync(
+                    predicate: t => t.CreateDate.Equals(date),
+                    includeFunc: q => q
+                    .Include(t => t.CurrentVersion)
+                    .Include(t => t.Versions)
+                    .Include(t => t.Documents)
+                    );
+
+                if (task == null)
+                {
+                    return new ResultViewModel<UserTask>
+                    {
+                        Data = null,
+                        IsSuccess = false,
+                        Message = "Task not found for the given date"
+                    };
+                }
+
+                return new ResultViewModel<UserTask>
+                {
+                    Data = task,
+                    IsSuccess = true,
+                    Message = "Task retrieved successfully"
+                };
+            }
+            catch (Exception ex)
+            {
+                return new ResultViewModel<UserTask>
+                {
+                    Data = null,
+                    IsSuccess = false,
+                    Message = $"Failed to get task: {ex.Message}"
+                };
+            }
         }
     }
 }

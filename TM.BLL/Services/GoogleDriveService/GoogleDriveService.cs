@@ -9,7 +9,7 @@ using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 
-namespace TM.BLL.GoogleDriveService
+namespace TM.BLL.Services.GoogleDriveService
 {
     public class GoogleDriveService : IGoogleDriveService, IDisposable
     {
