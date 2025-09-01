@@ -12,4 +12,10 @@ public interface ITaskService
     Task<ResultViewModel<List<UserTask>>> GetAllTasks();
     Task<ResultViewModel<string>> GetLastUpdaterNameById(int id);
     Task<ResultViewModel<string>> GetFirstUpdaterNameById(int id);
+
+    Task<ResultViewModel<UserTask>> GetTaskById(int id);
+    Task<ResultViewModel<UserTask>> GetTaskByVersionId(int versionId);
+    Task<ResultViewModel<UserTask>> GetTaskByVersion(int version);
+    Task<ResultViewModel<UserTask>> GetTaskByTitle(string title);
+    Task<ResultViewModel<UserTask>> GetTaskByDate(string date);
 }

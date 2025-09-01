@@ -1,4 +1,5 @@
-﻿using Microsoft.EntityFrameworkCore;
+﻿using Dtos.VersionDtos;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Identity.Client;
 using System;
 using System.Collections.Generic;
@@ -6,6 +7,7 @@ using System.Linq;
 using System.Net.Http.Headers;
 using System.Text;
 using System.Threading.Tasks;
+using TM.BLL.ViewModels;
 using TM.DAL.Abstract;
 using TM.DAL.Entities.AppEntities;
 
@@ -19,7 +21,7 @@ namespace TM.DAL.Concrete
             _context = context;
         }
 
-        public async Task<TaskVersion> GetNewVersionByTaskId(int taskId, int LastUpdaterId, string status)
+        public async Task<ResultViewModel<TaskVersion>> GetNewVersionByTaskId(int taskId, int LastUpdaterId, string status)
         {
             var userTask = _context.Tasks
                                         .Include(x => x.CurrentVersion)
@@ -61,19 +63,19 @@ namespace TM.DAL.Concrete
 
             _context.Tasks.Update(userTask);
             await _context.SaveChangesAsync();
-            return newVersion;
+            return ResultViewModel<TaskVersion>.Success(newVersion, "New version created successfully.", 200);
         }
 
-        public async Task<List<TaskVersion>> GetAllVersionsByTaskId(int taskId)
+        public async Task<ResultViewModel<List<TaskVersion>>> GetAllVersionsByTaskId(int taskId)
         {
             var userTask = await _context.Versions
                                             .Include(x => x.Task)
                                             .Where(x => x.TaskId == taskId)
                                             .ToListAsync();
-            return userTask;
+            return ResultViewModel<List<TaskVersion>>.Success(userTask, "Versions retrieved successfully.", 200);
         }
 
-        public async Task<TaskVersion> DeleteLatestVersionByTaskId(int taskId)
+        public async Task<ResultViewModel<TaskVersion>> DeleteLatestVersionByTaskId(int taskId)
         {
             var existedTask = await _context.Tasks
                 .Include(x => x.CurrentVersion)
@@ -108,75 +110,42 @@ namespace TM.DAL.Concrete
 
                 await _context.SaveChangesAsync();
                 await transaction.CommitAsync();
-                return latestVersion;
+                return ResultViewModel<TaskVersion>.Success(latestVersion, "Latest version deleted successfully.", 200);
 
             }
             catch
             {
                 await transaction.RollbackAsync();
-                throw;
+                
+                return ResultViewModel<TaskVersion>.Failure("An error occurred while deleting the latest version.");
             }
         }
 
-
-        public async Task<TaskVersion> DeleteVersionByTaskId(int id)
-        {
-            var existedVersion = await _context.Versions.FindAsync(id);
-            if (existedVersion == null)
-                return null;
-
-            _context.Versions.Remove(existedVersion);
-            await _context.SaveChangesAsync();
-            return existedVersion;
-        }
-
-        public async Task<int> GetLatestVersionByTaskId(int id)
+        public async Task<ResultViewModel<int>> GetLatestVersionByTaskId(int id)
         {
 
             var latestVersion = await _context.Tasks.Where(x => x.Id == id).Select(x => x.CurrentVersion.VersionNumber).FirstOrDefaultAsync();
-            return latestVersion;
+            return ResultViewModel<int>.Success(latestVersion, "Latest version number retrieved successfully.", 200);
         }
 
-        public async Task<int?> GetVersionByTaskId(int id)
-        {
-            var existedTask = await _context.Tasks
-                                            .Include(x => x.CurrentVersion)
-                                            .FirstOrDefaultAsync(x => x.Id == id);
 
-            if (existedTask == null)
-                return null;
-
-            if (existedTask.CurrentVersion == null)
-                return null;
-
-            return existedTask.CurrentVersion.VersionNumber;
-        }
-
-        public async Task<TaskVersion> UpdateVersionByTaskId(int id, Version version)
-        {
-            var existedVersion = await _context.Versions.FindAsync(id);
-            if (existedVersion == null)
-                return null;
-            _context.Versions.Update(existedVersion);
-            await _context.SaveChangesAsync();
-            return existedVersion;
-        }
-        public async Task<TaskVersion?> GetVersionByVersionId(int versionId)
+        public async Task<ResultViewModel<TaskVersion?>> GetVersionByVersionId(int versionId)
         {
             var version = await _context.Versions
                                         .Include(x => x.Documents)
                                         .FirstOrDefaultAsync(x => x.Id == versionId);
 
-            return version;
+            return ResultViewModel<TaskVersion?>.Success(version, "Version retrieved successfully.", 200);
         }
 
 
-        public async Task<TaskVersion> GetBackVersionByVersionNumber(int taskId, int versionId, int lastUpdaterId)
+        public async Task<ResultViewModel<TaskVersion>> GetBackVersionByVersionNumber(GetBackVersionDto getBackVersionDto)
         {
+            var versionId = getBackVersionDto.taskId;
             var existedTask = await _context.Tasks.
                 Include(x => x.Versions)
                 .Include(x => x.CurrentVersion)
-                .FirstOrDefaultAsync(x => x.Id == taskId);
+                .FirstOrDefaultAsync(x => x.Id == versionId);
             if (existedTask == null)
             {
                 throw new ArgumentException("Geçerli ID ile görev bulunamadı");
@@ -184,15 +153,12 @@ namespace TM.DAL.Concrete
 
             var existedVersion = await _context.Versions.FindAsync(versionId);
 
-            existedTask.CurrentVersionId = versionId;
-            existedTask.LastUpdater = lastUpdaterId;
-
             _context.Tasks.Update(existedTask);
             await _context.SaveChangesAsync();
-            return existedVersion;
+            return ResultViewModel<TaskVersion?>.Success(existedVersion, "Version reverted succesfully",200);
         }
 
-        public async Task<TaskVersion> ChangeVersionStatusById(int versionId, string status)
+        public async Task<ResultViewModel<string>> ChangeVersionStatusById(int versionId, string status)
         {
             var existedVersion = await _context.Versions.FindAsync(versionId);
             if (existedVersion == null)
@@ -201,27 +167,16 @@ namespace TM.DAL.Concrete
             existedVersion.Status = status;
             _context.Update(existedVersion);
             await _context.SaveChangesAsync();
-            return existedVersion;
+            return ResultViewModel<string>.Success(existedVersion.Status, "Status changed succesfully", 200); 
         }
-        public async Task<List<TaskVersion>> GetAllVersionByTaskId( int taskId)
-        {
-            var existedTask = await _context.Tasks.FindAsync(taskId);
-            if (existedTask == null)
-                return null;
-
-            return await _context.Versions
-                                    .Where(x => x.TaskId == taskId)
-                                    .Include( x=> x.Task)
-                                    .ToListAsync();
-        }
-        public async Task<List<TaskVersion>> GetDocumentByTaskId(int taskId)
+        public async Task<ResultViewModel<List<TaskVersion>>> GetDocumentByTaskId(int taskId)
         {
             var result = await _context.Versions
                 .Where(tv => tv.TaskId == taskId)
                 .Include(tv => tv.Documents)
                 .ToListAsync();
 
-            return result;
+            return ResultViewModel<List<TaskVersion>>.Success(result, "Document found succesfully", 200);
         }
     }
 }
