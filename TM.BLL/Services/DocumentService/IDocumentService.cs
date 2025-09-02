@@ -5,9 +5,10 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using TM.DAL.Entities.AppEntities;
-namespace TM.DAL.Abstract
+
+namespace TM.BLL.Services.DocumentService
 {
-    public interface IDocumentRepository
+    public interface IDocumentService
     {
         Task<Document> CreateDocument(int taskId, string title, IFormFile file);
         Task<Document> UpdateDocumentFilePathById(int id, IFormFile file);

@@ -1,28 +1,29 @@
-﻿using Microsoft.AspNetCore.Http;
+﻿using AutoMapper;
+using Microsoft.AspNetCore.Http;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.Identity.Client;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
-using System.Threading.Tasks;
-using TM.DAL.Abstract;
-using TM.DAL.Entities.AppEntities;
 using System.Text.RegularExpressions;
-using System.Reflection.Metadata.Ecma335;
-namespace TM.DAL.Concrete
-{
-    public class DocumentRepository  : IDocumentRepository
-    {
-        private readonly Context _context;
-        
-        public DocumentRepository(Context context)
-        {
-            _context = context;
-            
-        }
+using System.Threading.Tasks;
+using TM.BLL.Services.GoogleDriveService;
+using TM.DAL;
+using TM.DAL.Abstract;
+using TM.DAL.Concrete;
+using TM.DAL.Entities.AppEntities;
 
-        public async Task<Document> CreateDocument(int taskId , string title,  IFormFile file)
+namespace TM.BLL.Services.DocumentService
+{
+    public class DocumentService : IDocumentService
+    {
+        private readonly IDocumentService _documentService;
+        private readonly IBaseRepository<Document> _baseRepository;
+        private readonly IMapper _mapper;
+        private readonly IGoogleDriveService _googleDriveService;
+        private readonly Context _context;
+
+        public async Task<Document> CreateDocument(int taskId, string title, IFormFile file)
         {
             var existedVersion = await _context.Tasks
                                    .Include(x => x.CurrentVersion)
@@ -48,9 +49,7 @@ namespace TM.DAL.Concrete
             await _context.SaveChangesAsync();
 
             return document;
-
         }
-
         public async Task<Document> UpdateDocumentFilePathById(int id, IFormFile file)
         {
             var existedItem = await _context.Documents.FindAsync(id);
@@ -100,7 +99,7 @@ namespace TM.DAL.Concrete
             _context.Documents.Remove(existedItem);
             await _context.SaveChangesAsync();
             return existedItem;
-        }        
+        }
     }
 }
 
