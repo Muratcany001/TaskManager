@@ -2,15 +2,16 @@
 using TM.DAL.Entities.AppEntities;
 using TM.DAL.Entities;
 using TM.DAL.Abstract;
+using TM.BLL.Services.DocumentService;
 namespace TM.UI.Controllers
 {
     [ApiController]
     public class DocumentController : ControllerBase
     {
-        private readonly IDocumentRepository _documentRepository;
-        public DocumentController(IDocumentRepository documentRepository)
+        private readonly IDocumentService _documentService;
+        public DocumentController(DocumentService documentRepository)
         {
-            _documentRepository = documentRepository;
+            _documentService = documentRepository;
         }
 
         [HttpPost("Document/CreateDocument/{taskId}/{title}")]
@@ -23,7 +24,7 @@ namespace TM.UI.Controllers
                     return BadRequest("Document cannot be null");
                 }
 
-                var createdDocument = await _documentRepository.CreateDocument(taskId, title, file);
+                var createdDocument = await _documentService.CreateDocument(taskId, title, file);
                 return Ok(createdDocument);
             }
             catch (KeyNotFoundException ex)
@@ -44,18 +45,18 @@ namespace TM.UI.Controllers
         public async Task<ActionResult> DeleteDocumentById(int documentId)
         {
 
-            var existedDocument = await _documentRepository.GetDocumentById(documentId);
+            var existedDocument = await _documentService.GetDocumentById(documentId);
             if (existedDocument == null)
                 return BadRequest("Geçerli belge bulunamadı");
 
-            await _documentRepository.DeleteDocumentById(existedDocument.Id);
+            await _documentService.DeleteDocumentById(existedDocument.Id);
             return Ok("Belge silindi");
         }
 
         [HttpGet("Document/GetDocumentById/{documentId}")]
         public async Task<ActionResult> GetTaskItemById(int documentId)
         {
-            var existedPart = await _documentRepository.GetDocumentById(documentId);
+            var existedPart = await _documentService.GetDocumentById(documentId);
             if (existedPart == null)
             {
                 return BadRequest("İstenilen dosya bulunamadı");
@@ -65,7 +66,7 @@ namespace TM.UI.Controllers
         [HttpGet("Document/GetAllDocuments")]
         public async Task<ActionResult<List<ActionResult>>> GetAllTaskItems()
         {
-            var documents = await _documentRepository.GetAllDocuments();
+            var documents = await _documentService.GetAllDocuments();
             if (documents == null)
                 return BadRequest("Liste boş");
 
@@ -77,7 +78,7 @@ namespace TM.UI.Controllers
             if (file == null)
                 return BadRequest("Güncelleme verisi gönderilmedi");
 
-            var updatedItem = await _documentRepository.UpdateDocumentFilePathById(documentId, file);
+            var updatedItem = await _documentService.UpdateDocumentFilePathById(documentId, file);
 
             if (updatedItem == null)
                 return NotFound("Dosya bulunamadı");
@@ -87,7 +88,7 @@ namespace TM.UI.Controllers
         [HttpGet("Document/GetDocumentByTaskId/{taskId}")]
         public async Task<ActionResult<List<Document>>> GetDocumentyByTaskId(int taskId)
         {
-            var existedDocument = await _documentRepository.GetDocumentById(taskId);
+            var existedDocument = await _documentService.GetDocumentById(taskId);
             if (existedDocument == null)
                 return BadRequest("Belge bulunamadı");
             return Ok(existedDocument);

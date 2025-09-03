@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Http;
+﻿using Dtos.DocumentDtos;
+using Microsoft.AspNetCore.Http;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -10,8 +11,8 @@ namespace TM.BLL.Services.DocumentService
 {
     public interface IDocumentService
     {
-        Task<Document> CreateDocument(int taskId, string title, IFormFile file);
-        Task<Document> UpdateDocumentFilePathById(int id, IFormFile file);
+        Task<Document> CreateDocument(CreateDocumentDto createDocumentDto);
+        Task<Document> UpdateDocumentFilePathById(UpdateDocumentDto updateDocumentDto);
         Task<Document> DeleteDocumentById(int id);
         Task<Document> GetDocumentById(int id);
         Task<List<Document>> GetAllDocuments();

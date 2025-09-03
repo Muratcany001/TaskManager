@@ -1,4 +1,5 @@
-﻿using Google.Apis.Auth.OAuth2;
+﻿using Azure.Core;
+using Google.Apis.Auth.OAuth2;
 using Google.Apis.Drive.v3;
 using Google.Apis.Services;
 using Google.Apis.Upload;
@@ -63,7 +64,7 @@ namespace TM.BLL.Services.GoogleDriveService
 
                 var request = _driveService.Files.Create(fileMetadata, stream, file.ContentType);
                 request.Fields = "id,name,webViewLink,webContentLink";
-
+                request.SupportsAllDrives = true;
                 var uploadResult = await request.UploadAsync();
 
                 if (uploadResult.Status == UploadStatus.Completed)
@@ -116,6 +117,7 @@ namespace TM.BLL.Services.GoogleDriveService
 
                 var updateRequest = _driveService.Files.Update(fileMetadata, fileId, stream, newFile.ContentType);
                 updateRequest.Fields = "id,name,webViewLink";
+                updateRequest.SupportsAllDrives = true;
 
                 var uploadResult = await updateRequest.UploadAsync();
 
@@ -156,6 +158,7 @@ namespace TM.BLL.Services.GoogleDriveService
                 var listRequest = _driveService.Files.List();
                 listRequest.Q = $"mimeType='application/vnd.google-apps.folder' and name='{folderName}' and trashed=false";
                 listRequest.Fields = "files(id,name)";
+                listRequest.SupportsAllDrives = true;
 
                 var result = await listRequest.ExecuteAsync();
                 var folder = result.Files.FirstOrDefault();
@@ -172,6 +175,7 @@ namespace TM.BLL.Services.GoogleDriveService
 
                 var createRequest = _driveService.Files.Create(fileMetadata);
                 createRequest.Fields = "id";
+                createRequest.SupportsAllDrives = true;
 
                 var createdFolder = await createRequest.ExecuteAsync();
                 return createdFolder.Id;

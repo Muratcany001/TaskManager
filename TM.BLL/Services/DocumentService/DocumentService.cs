@@ -1,4 +1,5 @@
 ﻿using AutoMapper;
+using Dtos.DocumentDtos;
 using Microsoft.AspNetCore.Http;
 using Microsoft.EntityFrameworkCore;
 using System;
@@ -23,25 +24,25 @@ namespace TM.BLL.Services.DocumentService
         private readonly IGoogleDriveService _googleDriveService;
         private readonly Context _context;
 
-        public async Task<Document> CreateDocument(int taskId, string title, IFormFile file)
+        public async Task<Document> CreateDocument(CreateDocumentDto createDocumentDto)
         {
             var existedVersion = await _context.Tasks
                                    .Include(x => x.CurrentVersion)
-                                   .FirstOrDefaultAsync(x => x.Id == taskId);
+                                   .FirstOrDefaultAsync(x => x.Id == createDocumentDto.taskId);
 
             if (existedVersion == null)
                 return null;
 
             var document = new Document
             {
-                TaskId = taskId,
-                Title = title
+                TaskId = createDocumentDto.taskId,
+                Title = createDocumentDto.title
 
             };
 
-            if (file != null)
+            if (createDocumentDto.file != null)
             {
-                var uploadedFilePath = await _googleDriveService.UploadFileAsync(file);
+                var uploadedFilePath = await _googleDriveService.UploadFileAsync(createDocumentDto.file);
                 document.FilePath = uploadedFilePath;
             }
 
@@ -50,12 +51,12 @@ namespace TM.BLL.Services.DocumentService
 
             return document;
         }
-        public async Task<Document> UpdateDocumentFilePathById(int id, IFormFile file)
+        public async Task<Document> UpdateDocumentFilePathById(UpdateDocumentDto updateDocumentDto)
         {
-            var existedItem = await _context.Documents.FindAsync(id);
+            var existedItem = await _context.Documents.FindAsync(updateDocumentDto.id);
             if (existedItem == null) return null;
 
-            if (file != null)
+            if (updateDocumentDto.file != null)
             {
                 var match = Regex.Match(existedItem.FilePath, @"/d/([^/]+)");
                 if (!match.Success)
@@ -64,7 +65,7 @@ namespace TM.BLL.Services.DocumentService
                 }
                 var fileId = match.Groups[1].Value;
 
-                var uploadedFilePath = await _googleDriveService.UpdateFileAsync(fileId, file);
+                var uploadedFilePath = await _googleDriveService.UpdateFileAsync(fileId, updateDocumentDto.file);
                 existedItem.FilePath = uploadedFilePath;
             }
 
@@ -99,7 +100,7 @@ namespace TM.BLL.Services.DocumentService
             _context.Documents.Remove(existedItem);
             await _context.SaveChangesAsync();
             return existedItem;
-        }
+        }        
     }
 }
 
