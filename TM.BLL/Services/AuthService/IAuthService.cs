@@ -11,6 +11,5 @@ namespace TM.BLL.Services.AuthService
     public interface IAuthService
     {
         Task<ResultViewModel<string>> Login (LoginDto loginDto);
-        Task<ResultViewModel<string>> Register(RegisterDto registerDto);
     }
 }

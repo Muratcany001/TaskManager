@@ -5,7 +5,7 @@
 namespace TM.DAL.Migrations
 {
     /// <inheritdoc />
-    public partial class YeniMigrationAdi : Migration
+    public partial class MigrationAdi2 : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
@@ -23,15 +23,15 @@ namespace TM.DAL.Migrations
                 table: "Documents",
                 column: "TaskId",
                 principalTable: "Tasks",
-                principalColumn: "Id");
+                principalColumn: "Id",
+                onDelete: ReferentialAction.Restrict);
 
             migrationBuilder.AddForeignKey(
                 name: "FK_Documents_Versions_TaskVersionId",
                 table: "Documents",
                 column: "TaskVersionId",
                 principalTable: "Versions",
-                principalColumn: "Id",
-                onDelete: ReferentialAction.Restrict);
+                principalColumn: "Id");
         }
 
         /// <inheritdoc />
@@ -50,15 +50,15 @@ namespace TM.DAL.Migrations
                 table: "Documents",
                 column: "TaskId",
                 principalTable: "Tasks",
-                principalColumn: "Id",
-                onDelete: ReferentialAction.Restrict);
+                principalColumn: "Id");
 
             migrationBuilder.AddForeignKey(
                 name: "FK_Documents_Versions_TaskVersionId",
                 table: "Documents",
                 column: "TaskVersionId",
                 principalTable: "Versions",
-                principalColumn: "Id");
+                principalColumn: "Id",
+                onDelete: ReferentialAction.Restrict);
         }
     }
 }

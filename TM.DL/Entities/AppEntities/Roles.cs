@@ -9,7 +9,7 @@ namespace TM.DAL.Entities.AppEntities
     public class Roles
     {
         public int Id { get; set; }
-        public string Role { get; set; }
+        public string RoleName { get; set; }
         public ICollection<User> Users { get; set; }
     }
 }

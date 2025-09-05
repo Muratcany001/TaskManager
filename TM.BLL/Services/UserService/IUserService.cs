@@ -19,5 +19,11 @@ namespace TM.BLL.Services.UserService
         Task<ResultViewModel<object>> DeleteUserAsync(int id);
         Task<ResultViewModel<object>> UpdatePasswordAsync(int id, UpdatePasswordDto updatePasswordDto);
         ResultViewModel<object> ValidateUser(string email, string password);
+
+        Task<ResultViewModel<User>> GetByEmailAsync(string email);
+        Task<ResultViewModel<List<User>>> GetActiveUsersAsync();
+        Task<ResultViewModel<User>> GetUserWithRolesAsync(string role);
+        Task<ResultViewModel<bool>> EmailExistsAsync(string email);
+
     }
 }

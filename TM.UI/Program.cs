@@ -1,44 +1,56 @@
-﻿using Microsoft.EntityFrameworkCore;
+﻿using FluentValidation.AspNetCore;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Diagnostics;
 using System.Text.Json.Serialization;
-using FluentValidation;
+using TM.BLL.Services.DocumentService;
+using TM.BLL.Services.GoogleDriveService;
+using TM.BLL.Services.TaskService;
+using TM.BLL.Services.UserService;
+using TM.BLL.Services.VersionService;
+using TM.BLL.Utilities.ValidationRules;
 using TM.DAL;
-using AutoMapper;
 using TM.DAL.Abstract;
 using TM.DAL.Concrete;
-using TM.DAL.Entities;
-using TM.DAL.Entities.AppEntities;
-using FluentValidation.AspNetCore;
-using TM.BLL.Utilities.ValidationRules;
-using Dtos;
-using TM.BLL.Mappings;
-using TM.BLL.Services.GoogleDriveService;
 
 var builder = WebApplication.CreateBuilder(args);
 
+// DbContext
 builder.Services.AddDbContext<Context>(options =>
-    options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
+{
+    options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection"));
+    options.ConfigureWarnings(warnings =>
+        warnings.Ignore(
+            RelationalEventId.PendingModelChangesWarning,
+            RelationalEventId.MultipleCollectionIncludeWarning
+        ));
+});
 
+// CORS
 var MyAllowSpecificOrigins = "_myAllowSpecificOrigins";
 builder.Services.AddCors(options =>
 {
     options.AddPolicy(name: MyAllowSpecificOrigins,
                       policyBuilder =>
                       {
-                          policyBuilder.WithOrigins("https://localhost:4200", "http://localhost:4200" , "localhost:4200")
+                          policyBuilder.WithOrigins("https://localhost:4200", "http://localhost:4200")
                                        .AllowAnyHeader()
-                                       .AllowAnyMethod().AllowCredentials();
+                                       .AllowAnyMethod()
+                                       .AllowCredentials();
                       });
 });
 
-
-
-
+// Repository & Service Registrations
 builder.Services.AddScoped<ITaskRepository, UserTaskRepository>();
 builder.Services.AddScoped<ITaskVersionRepository, TaskVersionRepository>();
 builder.Services.AddScoped<IUserRepository, UserRepository>();
-builder.Services.AddScoped<IDocumentRepository, DocumentRepository>();
+
+builder.Services.AddScoped<IDocumentService, DocumentService>();
+builder.Services.AddScoped<ITaskService, TaskService>();
+builder.Services.AddScoped<IVersionService, VersionService>();
+builder.Services.AddScoped<IUserService, UserService>();
 builder.Services.AddScoped<IGoogleDriveService, GoogleDriveService>();
 
+// Controllers + JSON + FluentValidation
 builder.Services.AddControllers()
     .AddJsonOptions(options =>
     {
@@ -46,16 +58,20 @@ builder.Services.AddControllers()
         options.JsonSerializerOptions.WriteIndented = true;
     })
     .AddFluentValidation(config =>
-     {
-         config.RegisterValidatorsFromAssemblyContaining<LoginDtoValidator>();
-     });
+    {
+        config.RegisterValidatorsFromAssemblyContaining<LoginDtoValidator>();
+    });
 
+// AutoMapper
 builder.Services.AddAutoMapper(typeof(Program));
+
+// Swagger
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
 var app = builder.Build();
 
+// Middleware
 if (app.Environment.IsDevelopment())
 {
     app.UseSwagger();
@@ -63,11 +79,8 @@ if (app.Environment.IsDevelopment())
 }
 
 app.UseHttpsRedirection();
-
 app.UseCors(MyAllowSpecificOrigins);
-
 app.UseAuthorization();
-
 app.MapControllers();
 
 app.Run();

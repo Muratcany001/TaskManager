@@ -78,7 +78,7 @@ namespace TM.BLL.Services.UserService
         public async Task<ResultViewModel<List<UserDto>>> GetAllUsersAsync()
         {
             var users = await _userRepository.GetActiveUsersAsync();
-            var userDtos = _mapper.Map<List<UserDto>>(users);
+            var userDtos = _mapper.Map<List<UserDto >>(users);
             return ResultViewModel<List<UserDto>>.Success(userDtos);
         }
 
@@ -117,30 +117,32 @@ namespace TM.BLL.Services.UserService
 
         public async Task<ResultViewModel<object>> UpdatePasswordAsync(int id, UpdatePasswordDto updatePasswordDto)
         {
+            // Validation
             var validationResult = await _updatePasswordValidator.ValidateAsync(updatePasswordDto);
             if (!validationResult.IsValid)
             {
                 var errorMessages = validationResult.Errors.Select(e => e.ErrorMessage).ToList();
                 return ResultViewModel<object>.Failure("Lütfen girdiğiniz bilgileri kontrol edin.", errorMessages, 400);
             }
-
             var user = await _userRepository.GetByIdAsync(id);
             if (user == null || !user.IsActive)
             {
                 return ResultViewModel<object>.Failure("Kullanıcı bulunamadı.", null, 404);
             }
-
             if (!_hashService.VerifyPassword(updatePasswordDto.CurrentPassowrd, user.Password))
             {
                 return ResultViewModel<object>.Failure("Mevcut şifre hatalı.", null, 400);
             }
-
+            if (updatePasswordDto.CurrentPassowrd == updatePasswordDto.NewPassword)
+            {
+                return ResultViewModel<object>.Failure("Yeni şifre mevcut şifre ile aynı olamaz.", null, 400);
+            }
             user.Password = _hashService.HashPassword(updatePasswordDto.NewPassword);
-            user.UpdatedAt = DateTime.Now;
+            user.UpdatedAt = DateTime.UtcNow;
 
             await _userRepository.UpdateAsync(user);
 
-            return ResultViewModel<object>.Success("Şifre başarıyla güncellendi.");
+            return ResultViewModel<object>.Success("Şifre başarıyla güncellendi.", null, 200);
         }
 
         public async Task<ResultViewModel<object>> DeleteUserAsync(int id)
@@ -189,5 +191,47 @@ namespace TM.BLL.Services.UserService
             }
         }
 
+        public async Task<ResultViewModel<User>> GetByEmailAsync(string email)
+        {
+            var user = await _userRepository.GetByEmailAsync(email);
+
+            if (user == null)
+            {
+                return ResultViewModel<User>.NotFound("User not found", 404);
+            }
+
+            return ResultViewModel<User>.Success(user, "User found successfully", 200);
+        }
+
+        public async Task<ResultViewModel<List<User>>> GetActiveUsersAsync()
+        {
+            var users = await _userRepository.GetActiveUsersAsync();
+
+            if(users is null)
+            {
+                return ResultViewModel<List<User>>.NotFound("Users not found", 404);
+            }
+            return ResultViewModel<List<User>>.Success(users,"Users found", 200);
+        }
+
+        public async Task<ResultViewModel<User>> GetUserWithRolesAsync(string role)
+        {
+            var user = await _userRepository.GetUserWithRolesAsync(role);
+            if (user == null) 
+            {
+                return ResultViewModel<User>.NotFound("Users not found", 404);
+            }
+            return ResultViewModel<User>.Success(user, "User found", 200);
+        }
+
+        public async Task<ResultViewModel<bool>> EmailExistsAsync(string email)
+        {
+            var result = await _userRepository.EmailExistsAsync(email);
+            if (result == null)
+            {
+                return ResultViewModel<bool>.NotFound("Email or password isnt correct", 400);
+            }
+            return ResultViewModel<bool>.Success(result,"Email founded",200);
+        }
     }
 }

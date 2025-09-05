@@ -12,8 +12,8 @@ using TM.DAL;
 namespace TM.DAL.Migrations
 {
     [DbContext(typeof(Context))]
-    [Migration("20250729121752_YeniMigrationAdi")]
-    partial class YeniMigrationAdi
+    [Migration("20250905220131_MigrationAdi3")]
+    partial class MigrationAdi3
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -162,16 +162,14 @@ namespace TM.DAL.Migrations
                 {
                     b.HasOne("TM.DAL.Entities.AppEntities.UserTask", "Task")
                         .WithMany("Documents")
-                        .HasForeignKey("TaskId");
-
-                    b.HasOne("TM.DAL.Entities.AppEntities.TaskVersion", "TaskVersion")
-                        .WithMany("Documents")
-                        .HasForeignKey("TaskVersionId")
+                        .HasForeignKey("TaskId")
                         .OnDelete(DeleteBehavior.Restrict);
 
-                    b.Navigation("Task");
+                    b.HasOne("TM.DAL.Entities.AppEntities.TaskVersion", null)
+                        .WithMany("Documents")
+                        .HasForeignKey("TaskVersionId");
 
-                    b.Navigation("TaskVersion");
+                    b.Navigation("Task");
                 });
 
             modelBuilder.Entity("TM.DAL.Entities.AppEntities.TaskVersion", b =>

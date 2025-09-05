@@ -14,7 +14,7 @@ namespace TM.BLL.Mappings
         public UserProfile() {
 
             CreateMap<RegisterDto, User>();
-            CreateMap<User, UserDto>();
+            CreateMap<User, RegisterDto>();
         }
     }
 }

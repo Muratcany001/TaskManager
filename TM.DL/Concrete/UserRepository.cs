@@ -29,11 +29,11 @@ namespace TM.DAL.Concrete
             return await GetListAsync(x => x.IsActive);
         }
 
-        public async Task<User> GetUserWithRolesAsync(int id)
+        public async Task<User> GetUserWithRolesAsync(string role)
         {
             return await GetAsync(
-                x => x.Id == id,
-                includeFunc: query => query.Include(u => u.Roles).ThenInclude(ur => ur.Role)
+                x => x.Roles.Any(tr => tr.RoleName == role),
+                includeFunc: query => query.Include(u => u.Roles)
             );
         }
 

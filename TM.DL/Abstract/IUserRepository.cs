@@ -11,7 +11,7 @@ namespace TM.DAL.Abstract
     {
         Task<User> GetByEmailAsync(string email);
         Task<List<User>> GetActiveUsersAsync();
-        Task<User> GetUserWithRolesAsync(int id);
+        Task<User> GetUserWithRolesAsync(string role);
         Task<bool> EmailExistsAsync(string email);
     }
 }

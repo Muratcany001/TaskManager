@@ -3,6 +3,7 @@ using TM.DAL.Entities.AppEntities;
 using TM.DAL.Entities;
 using TM.DAL.Abstract;
 using TM.BLL.Services.DocumentService;
+using Dtos.DocumentDtos;
 namespace TM.UI.Controllers
 {
     [ApiController]
@@ -15,16 +16,16 @@ namespace TM.UI.Controllers
         }
 
         [HttpPost("Document/CreateDocument/{taskId}/{title}")]
-        public async Task<ActionResult> CreateTaskItem(int taskId, string title, IFormFile file)
+        public async Task<ActionResult> CreateTaskItem(CreateDocumentDto createDocumentDto)
         {
             try
             {
-                if (file == null)
+                if (createDocumentDto.file == null)
                 {
                     return BadRequest("Document cannot be null");
                 }
 
-                var createdDocument = await _documentService.CreateDocument(taskId, title, file);
+                var createdDocument = await _documentService.CreateDocument(createDocumentDto);
                 return Ok(createdDocument);
             }
             catch (KeyNotFoundException ex)
@@ -73,12 +74,12 @@ namespace TM.UI.Controllers
             return Ok(documents);
         }
         [HttpPatch("Document/UpdateDocumentById/{documentId}")]
-        public async Task<ActionResult> UpdateDocumentFilePathById(int documentId, IFormFile file)
+        public async Task<ActionResult> UpdateDocumentFilePathById(UpdateDocumentDto updateDocumentDto)
         {
-            if (file == null)
+            if (updateDocumentDto.file == null)
                 return BadRequest("Güncelleme verisi gönderilmedi");
 
-            var updatedItem = await _documentService.UpdateDocumentFilePathById(documentId, file);
+            var updatedItem = await _documentService.UpdateDocumentFilePathById(updateDocumentDto);
 
             if (updatedItem == null)
                 return NotFound("Dosya bulunamadı");
